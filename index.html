@@ -2,54 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Omkar Jaybhaye | Portfolio</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OJ Inventory System</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    h1 { color: #1e3a8a; }
+    input, button {
+      padding: 8px;
+      margin: 4px;
+    }
+    table {
+      margin-top: 1rem;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #10b981;
+      color: white;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1 class="fade-in">Omkar Jaybhaye</h1>
-      <p class="fade-in delay">Web Developer | Learner | Creator</p>
-    </div>
-  </header>
+  <h1>OJ Inventory Dashboard</h1>
 
-  <section class="about fade-in">
-    <h2>About Me</h2>
-    <p>I’m a passionate web developer focused on creating clean, responsive, and interactive websites. Currently learning full-stack development.</p>
-  </section>
+  <h3>Add Item</h3>
+  <input type="text" id="name" placeholder="Item Name" />
+  <input type="number" id="quantity" placeholder="Quantity" />
+  <button onclick="addItem()">Add</button>
 
-  <section class="skills fade-in">
-    <h2>Skills</h2>
-    <ul>
-      <li>HTML</li>
-      <li>CSS</li>
-      <li>JavaScript</li>
-      <li>Python</li>
-      <li>MySQL</li>
-      <li>C and C++</li>
-    </ul>
-  </section>
+  <h3>All Items</h3>
+  <button onclick="fetchItems()">Refresh List</button>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Quantity</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="itemTable"></tbody>
+  </table>
 
-  <section class="projects fade-in">
-    <h2>Projects</h2>
-    <div class="project-card">
-      <h3>Online Auction System</h3>
-      <p>Built with Flask, React, and MySQL – includes live bidding, user login, and more.</p>
-    </div>
-  </section>
+  <script>
+    const API = "/api/items";
 
-  <section class="contact fade-in">
-    <h2>Contact</h2>
-    <p>📧 oj@example.com</p>
-    <p>🌐 <a href="https://github.com/" target="_blank">GitHub</a></p>
-  </section>
+    function fetchItems() {
+      fetch(API)
+        .then(res => res.json())
+        .then(data => {
+          const rows = data.map(item => `
+            <tr>
+              <td>${item.id}</td>
+              <td>${item.name}</td>
+              <td>${item.quantity}</td>
+              <td>
+                <button onclick="deleteItem(${item.id})">Delete</button>
+                <button onclick="updateItem(${item.id})">Update</button>
+              </td>
+            </tr>
+          `);
+          document.getElementById("itemTable").innerHTML = rows.join("");
+        });
+    }
 
-  <footer>
-    <p>© <span id="year"></span> Omkar Jaybhaye. All rights reserved.</p>
-  </footer>
-  
+    function addItem() {
+      const name = document.getElementById("name").value.trim();
+      const quantity = parseInt(document.getElementById("quantity").value);
 
-  <script src="script.js"></script>
+      if (!name || isNaN(quantity)) {
+        alert("Please enter valid name and quantity.");
+        return;
+      }
+
+      fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, quantity })
+      }).then(() => {
+        document.getElementById("name").value = "";
+        document.getElementById("quantity").value = "";
+        fetchItems();
+      });
+    }
+
+    function deleteItem(id) {
+      fetch(`${API}/${id}`, { method: "DELETE" })
+        .then(() => fetchItems());
+    }
+
+    function updateItem(id) {
+      const newName = prompt("Enter new name:");
+      const newQty = prompt("Enter new quantity:");
+
+      if (!newName || isNaN(parseInt(newQty))) {
+        alert("Invalid input.");
+        return;
+      }
+
+      fetch(`${API}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, quantity: parseInt(newQty) })
+      }).then(() => fetchItems());
+    }
+
+    // Load items on page load
+    fetchItems();
+  </script>
 </body>
 </html>
