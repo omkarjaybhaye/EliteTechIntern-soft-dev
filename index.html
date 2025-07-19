@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Real-time Editor</title>
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    textarea { width: 100%; height: 80vh; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <h2>Collaborative Editor</h2>
+  <textarea id="editor" placeholder="Start typing..."></textarea>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
